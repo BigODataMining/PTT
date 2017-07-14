@@ -29,9 +29,10 @@ public class PregnancyCorpusConverter {
 	public static void main(String[] argv) throws IOException {
 		try {
 			System.out.println("Reading file...");
-			JsonReader jsonReader = Json.createReader(new InputStreamReader(
-					new FileInputStream(// "sample.json"), "Big5"));// UTF8
-							"BabyMother-1-5955.json"), "UTF-8"));// UTF8
+			JsonReader jsonReader = Json.createReader(new InputStreamReader(new FileInputStream(// "sample.json"),
+																								// "Big5"));//
+																								// UTF8
+					"BabyMother-1-5955.json"), "UTF-8"));// UTF8
 			// 編碼
 			System.out.println("Reading json objects...");
 			JsonObject jsonObject = jsonReader.readObject();
@@ -40,25 +41,33 @@ public class PregnancyCorpusConverter {
 			System.out.println("Converting");
 			for (JsonValue value : jsonArray) {
 				JsonObject article = (JsonObject) value;
-				String article_id = (String) article.getString("article_id");
-				String article_title = (String) article.getString(
-						"article_title").replace("\\n", "\n");
-				String content = (String) article.getString("content").replace(
-						"\\n", "\n");
-				Document doc = DocumentHelper.createDocument();
-				Element root = doc.addElement("PTTCorpus");// <PTTCorpus>
-				Element second = root.addElement("TEXT");// <TEXT>
-				CDATA cdata = DocumentHelper.createCDATA("標題: " + article_title
-						+ "\n內文:\n" + content);
-				second.add(cdata);
-				FileWriter fw = new FileWriter(article_id + ".xml");
-				OutputFormat of = new OutputFormat();
-				of.setIndentSize(4);
-				of.setNewlines(true);
-				XMLWriter xw = new XMLWriter(fw, of);
-				xw.write(doc);
-				xw.close();
-				fw.close();
+				try {
+					String article_id = (String) article.getString("article_id");
+					String article_title = "";
+					if (!article.isNull("article_title")) {
+						article_title = (String) article.getString("article_title").replace("\\n", "\n");
+					}
+					String content = "";
+					if (!article.isNull("content")) {
+						content = (String) article.getString("content").replace("\\n", "\n");
+					}
+					Document doc = DocumentHelper.createDocument();
+					Element root = doc.addElement("PTTCorpus");// <PTTCorpus>
+					Element second = root.addElement("TEXT");// <TEXT>
+					CDATA cdata = DocumentHelper.createCDATA("標題: " + article_title + "\n內文:\n" + content);
+					second.add(cdata);
+					FileWriter fw = new FileWriter(article_id + ".xml");
+					OutputFormat of = new OutputFormat();
+					of.setIndentSize(4);
+					of.setNewlines(true);
+					XMLWriter xw = new XMLWriter(fw, of);
+					xw.write(doc);
+					xw.close();
+					fw.close();
+				} catch (Exception ex) {
+					System.out.println(ex.getMessage());
+				}
+
 			}
 			jsonReader.close();
 		} catch (Exception e) {
